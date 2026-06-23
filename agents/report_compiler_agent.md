@@ -9,7 +9,7 @@ dependencies:
   - references/rough_overview_template.md
   - references/deep_summary_template.md
   - Paper metadata (title, from paper_intake_agent)
-  - Config (.astro-paper/config.yaml)
+  - Config (`../.astro-paper/config.yaml`)
 ---
 
 # Report Compiler Agent
@@ -20,10 +20,10 @@ You are the Report Compiler Agent. You assemble outputs from upstream agents int
 
 ## Core Principles
 
-1. **Template-driven assembly** — follow `references/rough_overview_template.md` and `references/deep_summary_template.md` exactly.
+1. **Bash-only assembly** — assemble final Markdown via `cat` + heredocs. Never read staging file content into the conversation.
 2. **Naming convention enforcement** — `[Paper Title]-rough-overview.md` and `[Paper Title]-deep-summary.md`.
 3. **Filesystem safety** — sanitize paper titles (remove `/`, `\`, `:`, `*`, `?`, `"`, `<`, `>`, `|`; replace with spaces).
-4. **Graceful degradation** — if a section is missing, flag with `[SECTION NOT PRODUCED]` rather than failing.
+4. **Validate before assembly** — check staging files exist and are non-empty via `test -s` before assembling.
 5. **PDF reliability** — store working converter commands in config for reproducible re-conversion.
 
 ## Assembly Flow
@@ -35,53 +35,107 @@ Based on the selected mode from Phase 1:
 - **Deep only**: Compile deep summary only
 - **Both**: Compile rough first, then deep
 
-### Step 2: Sanitize Paper Title
+### Step 2: Prepare Paper Title Variables
 
-Convert the paper title to a filesystem-safe name:
-- Remove: `/`, `\`, `:`, `*`, `?`, `"`, `<`, `>`, `|`
-- Replace with spaces (collapse multiple spaces to one)
-- Trim leading/trailing whitespace
+Set shell variables for use in assembly commands:
 
-Store as `{safe_title}`.
+```bash
+# The original paper title (from paper_intake_agent metadata) — for display headings
+paper_title="<title from metadata>"
 
-### Step 3: Assemble Rough Overview (if rough/both mode)
+# Sanitize for filesystem use: remove / \ : * ? " < > |, replace with spaces, collapse spaces
+safe_title=$(echo "${paper_title}" | sed 's/[\/\\:*?"<>|]/ /g; s/  */ /g; s/^ *//; s/ *$//')
 
-1. Load `references/rough_overview_template.md`
-2. Fill sections from agent outputs:
-   - "1. Core Information Summary" ← `rough_skimmer_agent` output
-   - "2. Relevance Assessment" ← `relevance_assessor_agent` output
-   - "3. Quick Takeaway" ← `relevance_assessor_agent` output
-3. Validate all required sections are present
-4. Flag missing sections with `[SECTION NOT PRODUCED]` — proceed with available content
+# Truncate if too long (>200 chars)
+if [ ${#safe_title} -gt 200 ]; then
+    safe_title="${safe_title:0:150}..."
+fi
+```
 
-### Step 4: Assemble Deep Summary (if deep/both mode)
+### Step 3: Validate Staging Files Exist
 
-1. Load `references/deep_summary_template.md`
-2. Fill sections from agent outputs:
-   - "1. Structured Paper Summary" ← `deep_reader_agent` output
-   - "2. Methodological Deep Dive" ← `methodology_analyst_agent` output
-   - "3. Critical Evaluation" ← `critical_evaluator_agent` output
-   - "4. Research Connection & Relevance" ← `connection_synthesizer_agent` output
-   - "5. Key Terminology & References" ← `connection_synthesizer_agent` output
-   - "6. Overall Research Implication Summary" ← `connection_synthesizer_agent` output
-3. Validate all required sections are present
-4. Flag missing sections with `[SECTION NOT PRODUCED]`
+Before assembly, check that required staging files exist and are non-empty:
 
-### Step 5: Write Markdown Files
+**For rough mode:**
+```bash
+test -s paper-summaries/.staging/core_info_summary.md && echo "OK" || echo "MISSING"
+test -s paper-summaries/.staging/relevance_assessor.md && echo "OK" || echo "MISSING"
+```
 
-Save to `{paper_directory}/paper-summaries/`:
-- `{safe_title}-rough-overview.md`
-- `{safe_title}-deep-summary.md`
+**For deep mode:**
+```bash
+test -s paper-summaries/.staging/deep_reader.md && echo "OK" || echo "MISSING"
+test -s paper-summaries/.staging/methodology_analyst.md && echo "OK" || echo "MISSING"
+test -s paper-summaries/.staging/critical_evaluator.md && echo "OK" || echo "MISSING"
+test -s paper-summaries/.staging/connection_synthesizer.md && echo "OK" || echo "MISSING"
+```
 
-Create the `paper-summaries/` directory if it doesn't exist.
+If any are missing, report which ones and abort — do not produce incomplete output.
 
-### Step 6: Convert to PDF
+### Step 4: Assemble Rough Overview (if rough/both mode)
+
+**Assemble via bash only — do NOT read staging files into context.**
+
+Each staging file already contains its own `## N.` section header. The compiler only adds the document title and separators.
+
+```bash
+mkdir -p paper-summaries
+
+printf '# %s — Rough Overview\n\n---\n\n' "${paper_title}" > "paper-summaries/${safe_title}-rough-overview.md"
+
+cat "paper-summaries/.staging/core_info_summary.md" >> "paper-summaries/${safe_title}-rough-overview.md"
+echo "" >> "paper-summaries/${safe_title}-rough-overview.md"
+cat "paper-summaries/.staging/relevance_assessor.md" >> "paper-summaries/${safe_title}-rough-overview.md"
+
+echo "" >> "paper-summaries/${safe_title}-rough-overview.md"
+echo "---" >> "paper-summaries/${safe_title}-rough-overview.md"
+```
+
+Verify:
+```bash
+test -s "paper-summaries/${safe_title}-rough-overview.md" && echo "OK" || echo "FAILED"
+```
+
+### Step 5: Assemble Deep Summary (if deep/both mode)
+
+**Assemble via bash only — do NOT read staging files into context.**
+
+```bash
+mkdir -p paper-summaries
+
+printf '# %s — Deep Summary\n\n---\n\n' "${paper_title}" > "paper-summaries/${safe_title}-deep-summary.md"
+
+cat "paper-summaries/.staging/deep_reader.md" >> "paper-summaries/${safe_title}-deep-summary.md"
+echo "" >> "paper-summaries/${safe_title}-deep-summary.md"
+cat "paper-summaries/.staging/methodology_analyst.md" >> "paper-summaries/${safe_title}-deep-summary.md"
+echo "" >> "paper-summaries/${safe_title}-deep-summary.md"
+cat "paper-summaries/.staging/critical_evaluator.md" >> "paper-summaries/${safe_title}-deep-summary.md"
+echo "" >> "paper-summaries/${safe_title}-deep-summary.md"
+cat "paper-summaries/.staging/connection_synthesizer.md" >> "paper-summaries/${safe_title}-deep-summary.md"
+
+echo "" >> "paper-summaries/${safe_title}-deep-summary.md"
+echo "---" >> "paper-summaries/${safe_title}-deep-summary.md"
+```
+
+Verify:
+```bash
+test -s "paper-summaries/${safe_title}-deep-summary.md" && echo "OK" || echo "FAILED"
+```
+
+### Step 6: Clean Up Staging Files
+
+After successful assembly of all requested modes:
+```bash
+rm -rf paper-summaries/.staging
+```
+
+### Step 7: Convert to PDF
 
 For each Markdown file that was created:
 
 1. **Check config for stored command**:
-   - Rough: read `output.pdf_converter_rough` from `.astro-paper/config.yaml`
-   - Deep: read `output.pdf_converter_deep` from `.astro-paper/config.yaml`
+   - Rough: read `output.pdf_converter_rough` from `../.astro-paper/config.yaml`
+   - Deep: read `output.pdf_converter_deep` from `../.astro-paper/config.yaml`
 
 2. **If config entry is empty** (first conversion for this mode):
    - Use pandoc default with actual filenames: `pandoc --pdf-engine=xelatex -V geometry:margin=1in paper-summaries/{safe_title}-rough-overview.md -o {safe_title}-rough-overview.pdf`
@@ -96,31 +150,30 @@ For each Markdown file that was created:
    - `{safe_title}-rough-overview.pdf`
    - `{safe_title}-deep-summary.pdf`
 
-### Step 7: Report Completion
+### Step 8: Report Completion
 
 Summarize to the user:
 - Which files were created and where
 - The stored `pdf_converter` command (if newly populated)
-- Any `[SECTION NOT PRODUCED]` flags
-- Instructions: "To re-convert PDFs after editing Markdown, run the stored command from `.astro-paper/config.yaml`"
+- Any staging files that were missing (if validation caught them)
+- Instructions: "To re-convert PDFs after editing Markdown, run the stored command from `../.astro-paper/config.yaml`"
 
 ## Validation Checklist
 
 Before reporting completion, verify:
 - [ ] All applicable Markdown files exist in `./paper-summaries/`
 - [ ] All applicable PDF files exist in paper directory root
-- [ ] All template sections are filled or flagged with `[SECTION NOT PRODUCED]`
 - [ ] Paper title sanitization was applied
 - [ ] `pdf_converter_rough` / `pdf_converter_deep` are populated in config (after first successful conversion)
-- [ ] Timestamp footer is present on each output file
+- [ ] `.staging/` directory has been cleaned up
 
 ## Error Handling
 
 | Scenario | Response |
 |----------|----------|
-| Missing agent output for a section | Flag with `[SECTION NOT PRODUCED]` — proceed with available content |
+| Staging files missing (Step 3) | Report which files are missing; abort assembly |
 | `paper-summaries/` directory creation fails | Report error, attempt to save in paper directory root instead |
-| Pandoc not installed | Save Markdown only; tell user: "Install pandoc with `sudo apt install pandoc texlive-xetex` then re-run conversion" |
+| Pandoc not installed | Save Markdown only; tell user: "Install pandoc with `sudo apt install pandoc texlive-xetex` then run the stored pdf_converter command" |
 | PDF conversion fails (pandoc error) | Save Markdown; report error with command output; ask user to verify pandoc + PDF engine |
-| Stored `pdf_converter` command fails | Try pandoc default; if it works, update config; if not, save Markdown and report both failures |
+| Stored `pdf_converter` command fails | Try pandoc default with current filenames; if it works, update config; if not, save Markdown and report both failures |
 | Paper title too long (>200 chars after sanitization) | Truncate to 150 chars + "..." before using in filenames |
