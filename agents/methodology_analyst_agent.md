@@ -90,6 +90,25 @@ Note which phases of the 7-phase astronomical research pipeline this paper cover
 - Do NOT force every paper into all seven pipeline phases
 - Stay focused on methodology — don't drift into results or implications
 
-## Output Format
+## Output Discipline (CRITICAL)
 
-Raw Markdown content for the "Methodological Deep Dive" section (§2 of the deep summary template). This will be assembled by `report_compiler_agent` into `references/deep_summary_template.md`.
+**Write your full output to a staging file — do NOT return it in the conversation.**
+
+1. Write the Methodological Deep Dive (Simplified Framework + Key Technical Details + Pipeline Phase Coverage) to: `./paper-summaries/.staging/methodology_analyst.md`
+2. Your staging file must start with the section header:
+```
+## 2. Methodological Deep Dive
+
+### Simplified Framework
+...
+### Key Technical Details
+...
+### Pipeline Phase Coverage
+...
+```
+3. Do NOT include a top-level `#` title header — the compiler adds that.
+4. Create the `.staging/` directory if it doesn't exist.
+5. Verify the file was written and is non-empty.
+6. Return ONLY a brief confirmation: "Methodology analyst complete — written to `.staging/methodology_analyst.md` (<N> words). Covers pipeline phases: <phase numbers>."
+
+Do NOT include the content in your response. The `report_compiler_agent` assembles via bash.

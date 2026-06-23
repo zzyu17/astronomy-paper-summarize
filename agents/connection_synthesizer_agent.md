@@ -85,11 +85,46 @@ Prioritize references that are:
 - Do NOT re-summarize the paper — build on `deep_reader_agent` output
 - Do NOT re-evaluate the paper — build on `critical_evaluator_agent` output
 
-## Output Format
+## Output Discipline (CRITICAL)
 
-Raw Markdown content for:
-- "Research Connection & Relevance" section (§4 of the deep summary template)
-- "Key Terminology & References" section (§5 of the deep summary template)
-- "Overall Research Implication Summary" (§6 of the deep summary template)
+**Write your full output to a staging file — do NOT return it in the conversation.**
 
-These will be assembled by `report_compiler_agent` into `references/deep_summary_template.md`.
+1. Write all sections to: `./paper-summaries/.staging/connection_synthesizer.md`
+2. Your staging file must start with the section header and use this exact structure:
+
+```
+## 4. Research Connection & Relevance
+
+### Hypothesis Alignment
+[content]
+
+### Methodological Inspiration
+[content]
+
+### Gap Filling
+[content]
+
+### New Research Directions
+[content]
+
+## 5. Key Terminology & References
+
+### Key Technical Terms
+| Term | Definition & Context |
+[...]
+
+### High-Impact References
+| # | Reference | Relevance to the User's Research |
+[...]
+
+## 6. Overall Research Implication Summary
+
+[content]
+```
+
+3. Do NOT include a top-level `#` title header — the compiler adds that.
+4. Create the `.staging/` directory if it doesn't exist.
+5. Verify the file was written and is non-empty.
+6. Return ONLY a brief confirmation: "Connection synthesis complete — written to `.staging/connection_synthesizer.md` (<N> words). <N> terms defined, <N> references listed."
+
+Do NOT include the content in your response. The `report_compiler_agent` assembles via bash.
