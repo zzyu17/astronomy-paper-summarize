@@ -55,7 +55,8 @@ When activated, follow this flow:
 1. **Trigger detected** → Load this skill context
 2. **Read `agents/paper_intake_agent.md`** → Execute intake as the first agent
 3. **paper_intake_agent handles:**
-   - Load/create `.astro-paper/config.yaml`
+   - `cd` into the paper's project directory (all paths relative from here)
+   - Load/create `../.astro-paper/config.yaml` (parent of paper directory)
    - Prompt for research background if missing (Core Research Topic, Primary Goal, Proposed Methodology)
    - Generic fallback if user skips: auto-extract from abstract, present for approval
    - Ask user: **Rough**, **Deep**, or **Both**?
@@ -92,6 +93,12 @@ When `both` mode: Phase 2a → Phase 2b → Phase 3.
 
 ## Execution Mode Dispatch
 
+### Output Discipline (Both Modes)
+
+**CRITICAL: All analysis agents write output to staging files, never to the conversation.**
+
+Analysis agents (`rough_skimmer`, `relevance_assessor`, `deep_reader`, `methodology_analyst`, `critical_evaluator`, `connection_synthesizer`) write their full output to `./paper-summaries/.staging/<agent_name>.md` and return ONLY a brief 1-line confirmation. The `report_compiler_agent` assembles final output from staging files via bash `cat` + heredocs — staging content never enters the conversation context.
+
 ### Subagent-Driven (Default)
 
 For each agent in the active phase sequence, dispatch as a sub-agent:
@@ -103,20 +110,23 @@ task({
   prompt: [full content of agents/<agent_name>.md +
            paper text (for analysis agents) +
            research background from config +
-           accumulated outputs from prior agents in the phase]
+           previous staging file paths (agents reference them if needed)]
 })
 ```
 
-Collect output after each agent completes. Pass accumulated context to the next agent.
+The sub-agent writes its output to `paper-summaries/.staging/<agent_name>.md` and returns only a brief confirmation. The main session never loads the full content.
+
+After all analysis agents complete, dispatch `report_compiler_agent` which assembles via bash.
 
 ### Inline Execution
 
 For each agent in the active phase sequence, work through sequentially:
 
 1. Read the agent template from `agents/<agent_name>.md`
-2. Execute the agent's instructions as a structured task in the current session
-3. Collect and persist the output
+2. Execute the agent's instructions — it writes output to `paper-summaries/.staging/<agent_name>.md`
+3. Confirm the staging file was written (brief check)
 4. Move to the next agent
+5. After all analysis agents, execute `report_compiler_agent` instructions for bash assembly
 
 **Warning:** If running `both` mode on a long paper, monitor context usage. Warn the user if approaching context limits.
 

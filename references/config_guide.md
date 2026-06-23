@@ -93,7 +93,7 @@ Stored commands use actual filenames. Below are the equivalents before filename 
 If the user skips config creation, the `paper_intake_agent` will:
 1. Auto-extract approximate values from the paper's abstract
 2. Present them for the user's review/refinement
-3. Save approved values to `.astro-paper/config.yaml` for future use
+3. Save approved values to `../.astro-paper/config.yaml` for future use
 
 ## Updating Config
 
