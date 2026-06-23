@@ -1,0 +1,17 @@
+{
+  "name": "astronomy-paper-summarize",
+  "owner": {
+    "name": "Zhenyu Zhang",
+    "url": "https://github.com/zzyu17"
+  },
+  "description": "Multi-agent astronomy paper summarization — rough overview and deep summary with research-background-aware analysis.",
+  "plugins": [
+    {
+      "name": "astronomy-paper-summarize",
+      "source": "./",
+      "description": "8-agent astronomy paper summarization skill. 4 modes: rough, deep, both, config. ADS/arXiv API integration, pandoc PDF output, research-background-aware analysis.",
+      "version": "1.0.0",
+      "license": "CC-BY-NC-4.0"
+    }
+  ]
+}
