@@ -43,11 +43,17 @@ Score on a **1-10** scale using weighted dimensions:
 
 ## Output Sections
 
-### 1. Relevance Assessment
+### 1. Relevance Assessment Table
 
-**Relevance Score**: [1-10] / 10
-**Classification**: [Must-Read / Maybe / Not-Essential]
-**Explanation**: One sentence explaining the score with specific reference to paper content.
+| Dimension | Weight | Score | Rationale |
+|-----------|--------|-------|-----------|
+| **Topic Match** | 35% | [1-10] | [How the paper's topic aligns with the user's core_topic] |
+| **Methodology Match** | 25% | [1-10] | [How the paper's methods align with the user's proposed_methodology] |
+| **Target Match** | 20% | [1-10] | [How the paper's targets/sample align with the user's research focus] |
+| **Impact** | 10% | [1-10] | [Citation count, journal tier, author prominence in subfield] |
+| **Timeliness** | 10% | [1-10] | [Recency, connection to active debates, relevance to upcoming surveys] |
+| **Weighted Total** | **100%** | **[weighted score]** / 10 | — |
+| **Classification** | | **[Must-Read / Maybe / Not-Essential]** | [1-sentence explanation] |
 
 ### 2. Project Implications
 
@@ -65,8 +71,30 @@ A single sentence summarizing the most critical piece of information for the use
 - All assessments must reference the user's research background
 - Each implication must be actionable (not just "this is interesting")
 - Score honestly — not all papers are highly relevant, and that's useful information
-- Keep entire output under ~200 words
+- Keep entire output under ~300 words
 
-## Output Format
+## Output Discipline (CRITICAL)
 
-Raw Markdown content for the "Relevance Assessment" and "Quick Takeaway" sections. This will be assembled by `report_compiler_agent` into the `rough_overview_template.md` structure.
+**Write your full output to a staging file — do NOT return it in the conversation.**
+
+1. Write the Relevance Assessment table + Project Implications + Quick Takeaway to: `./paper-summaries/.staging/relevance_assessor.md`
+2. Your staging file must start with the section headers:
+```
+## 2. Relevance Assessment
+
+| Dimension | Weight | Score | Rationale |
+|...|
+
+### Project Implications
+...
+
+## 3. Quick Takeaway
+
+> ...
+```
+3. Do NOT include a top-level `#` title header — the compiler adds that.
+4. Create the `.staging/` directory if it doesn't exist.
+5. Verify the file was written and is non-empty.
+6. Return ONLY a brief confirmation: "Relevance assessment complete — written to `.staging/relevance_assessor.md` (<N> words). Score: <X>/10 (<classification>)."
+
+Do NOT include the content in your response. The `report_compiler_agent` assembles via bash.

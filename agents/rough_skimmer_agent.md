@@ -55,6 +55,22 @@ If signals are mixed, note all applicable types.
 - Do NOT infer limitations the authors don't state
 - Keep entire output under ~300 words
 
-## Output Format
+## Output Discipline (CRITICAL)
 
-Raw Markdown content for the "Core Information Summary" section. This will be assembled by `report_compiler_agent` into the `rough_overview_template.md` structure.
+**Write your full output to a staging file — do NOT return it in the conversation.**
+
+1. Write ONLY the Core Information Summary (the table from §1) to: `./paper-summaries/.staging/core_info_summary.md`
+2. Your staging file must start with the section header:
+```
+## 1. Core Information Summary
+
+| Element | Content |
+|...|
+```
+3. Do NOT include the Paper Type Detection in this file — return it in the confirmation only.
+4. Do NOT include a top-level `#` title header — the compiler adds that.
+5. Create the `.staging/` directory if it doesn't exist.
+6. Verify the file was written and is non-empty.
+7. Return ONLY a brief confirmation: "Rough skimmer complete — Core Information Summary written to `.staging/core_info_summary.md` (<N> words). Paper type: <type>."
+
+Do NOT include the content in your response. The `report_compiler_agent` assembles via bash.
