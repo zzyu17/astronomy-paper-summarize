@@ -26,6 +26,7 @@ The `report_compiler_agent` assembles output from `rough_skimmer_agent` and `rel
 - Chemical elements in math mode: `$\mathrm{H}_2\mathrm{O}$`, `$\mathrm{CO}$`
 - Subscripts with text: `$T_{\mathrm{eff}}$`, `$\log g$`, `$M_{\mathrm{vir}}$`
 - Do NOT use Unicode Greek letters (α, β, γ) — use `$\alpha$`, `$\beta$`, `$\gamma$` for PDF compatibility
+- **ABSOLUTELY FORBIDDEN:** `\(...\)` (inline) and `\[...\]` (display) — these are LaTeX-native delimiters that pandoc's default markdown reader does NOT parse as math, breaking PDF conversion. Use ONLY `$...$` and `$$...$$`.
 
 ---
 
