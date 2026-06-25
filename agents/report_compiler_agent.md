@@ -157,9 +157,9 @@ For each Markdown file that was created:
    - Deep: read `output.pdf_converter_deep` from `../.astro-paper/config.yaml`
 
 2. **Build the conversion command for the current paper**:
-   - **If config entry is empty or has no font support** (missing `-V mainfont`): Use the pandoc default:
+   - **If config entry is empty, use the pandoc default:
      ```
-     pandoc --pdf-engine=xelatex -V 'mainfont=DejaVu Serif' -V geometry:margin=1in paper-summaries/{safe_title}-rough-overview.md -o {safe_title}-rough-overview.pdf
+     pandoc --pdf-engine=xelatex -V 'mainfont=FreeSerif' -V geometry:margin=1in paper-summaries/{safe_title}-rough-overview.md -o {safe_title}-rough-overview.pdf
      ```
    - **If config has a stored command**: Extract the converter options (engine, font, geometry) from the stored command, but **always use the current paper's filenames** — never run the stored command as-is.
      - The stored command's filenames belong to a previous paper. Rebuild the command with `{safe_title}`.
@@ -200,7 +200,7 @@ Before reporting completion, verify:
 |----------|----------|
 | Staging files missing (Step 3) | Report which files are missing; abort assembly |
 | `paper-summaries/` directory creation fails | Report error, attempt to save in paper directory root instead |
-| Pandoc not installed | Save Markdown only; tell user: "Install pandoc with `sudo apt install pandoc texlive-xetex fonts-dejavu` then run the stored pdf_converter command" |
+| Pandoc not installed | Save Markdown only; tell user: "Install pandoc with `sudo apt install pandoc texlive-xetex fonts-freefont` then run the stored pdf_converter command" |
 | PDF conversion fails (pandoc error) | Save Markdown; report error with command output; ask user to verify pandoc + PDF engine |
 | Stored `pdf_converter` command fails | Try pandoc default with current filenames; if it works, update config; if not, save Markdown and report both failures |
 | Paper title too long (>200 chars after sanitization) | Truncate to 150 chars + "..." before using in filenames |

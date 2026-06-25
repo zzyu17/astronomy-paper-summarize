@@ -62,7 +62,7 @@ The `pdf_converter_rough` and `pdf_converter_deep` fields store the shell comman
 
 - **First run or empty config**: Uses the pandoc default:
   ```
-  pandoc --pdf-engine=xelatex -V 'mainfont=DejaVu Serif' -V geometry:margin=1in <markdown-file> -o <pdf-file>
+  pandoc --pdf-engine=xelatex -V 'mainfont=FreeSerif' -V geometry:margin=1in <markdown-file> -o <pdf-file>
   ```
 - **Subsequent papers**: Reads the stored command to learn the user's preferred converter options (engine, font, geometry), but **always rebuilds with the current paper's filenames**. The stored filenames from a previous paper are never reused.
 - **On failure**: Tries fallback engines (`weasyprint`, `wkhtmltopdf`). If all fail, saves Markdown only and reports errors.
@@ -81,7 +81,7 @@ Stored commands use actual filenames. Below are the equivalents before filename 
 
 | Converter | Command Pattern |
 |-----------|----------------|
-| **pandoc + xelatex** (default) | `pandoc --pdf-engine=xelatex -V 'mainfont=DejaVu Serif' -V geometry:margin=1in <md-file> -o <pdf-file>` |
+| **pandoc + xelatex** (default) | `pandoc --pdf-engine=xelatex -V 'mainfont=FreeSerif' -V geometry:margin=1in <md-file> -o <pdf-file>` |
 | **pandoc + weasyprint** | `pandoc --pdf-engine=weasyprint <md-file> -o <pdf-file>` |
 | **pandoc + wkhtmltopdf** | `pandoc --pdf-engine=wkhtmltopdf <md-file> -o <pdf-file>` |
 
