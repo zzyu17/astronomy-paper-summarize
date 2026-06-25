@@ -14,13 +14,22 @@ dependencies:
 
 ## Working Directory
 
-**Before anything else, `cd` into the paper directory.** The orchestrator passes `PAPER_DIR` in your prompt — use it:
+**CRITICAL: Bash sessions are stateless — `cd` does NOT persist between separate `bash` calls. Every single command that reads or writes files MUST include `cd "${PAPER_DIR}" && ` as a prefix.**
+
+The orchestrator provides the paper directory as the literal `PAPER_DIR` variable. First, verify access:
 
 ```bash
 cd "${PAPER_DIR}" && echo "CWD: $(pwd)"
 ```
 
-All relative paths (`./paper-summaries/...`) depend on this.
+Then for ALL subsequent file operations, chain `cd` as the prefix:
+```bash
+cd "${PAPER_DIR}" && mkdir -p paper-summaries/.staging
+cd "${PAPER_DIR}" && <write-to-file-command>
+cd "${PAPER_DIR}" && test -s paper-summaries/.staging/some_file.md && echo "OK" || echo "MISSING"
+```
+
+**NEVER use a bare relative path without the `cd` prefix.**
 
 ## Role Definition
 
