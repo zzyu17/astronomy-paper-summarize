@@ -10,6 +10,25 @@ The `report_compiler_agent` assembles output from `rough_skimmer_agent` and `rel
 
 ## Template
 
+### Math & Formula Formatting
+
+**All agents must use standard pandoc/LaTeX math notation.** This ensures correct rendering in both Markdown and PDF output.
+
+| Syntax | Usage | Example |
+|--------|-------|---------|
+| `$...$` | **Inline math** — within paragraph text | `the stellar mass $M_\star = 1.2\,M_\odot$` |
+| `$$...$$` | **Display math** — centered, standalone | `$$\chi^2 = \sum_i \frac{(O_i - E_i)^2}{\sigma_i^2}$$` |
+
+**Rules:**
+- Always wrap math symbols, Greek letters, subscripts, superscripts, and equations in `$...$` or `$$...$$`
+- Use LaTeX math commands: `\alpha`, `\beta`, `\Gamma`, `\times`, `\approx`, `\sim`, `\propto`, `\pm`, `\leq`, `\geq`, `\gg`, `\ll`, `\partial`, `\nabla`, `\int`, `\sum`, `\prod`
+- Units: `$\,\mathrm{km\,s^{-1}}$`, `$\,\mathrm{erg\,s^{-1}}$`
+- Chemical elements in math mode: `$\mathrm{H}_2\mathrm{O}$`, `$\mathrm{CO}$`
+- Subscripts with text: `$T_{\mathrm{eff}}$`, `$\log g$`, `$M_{\mathrm{vir}}$`
+- Do NOT use Unicode Greek letters (α, β, γ) — use `$\alpha$`, `$\beta$`, `$\gamma$` for PDF compatibility
+
+---
+
 ```markdown
 # [Paper Title] — Rough Overview
 
