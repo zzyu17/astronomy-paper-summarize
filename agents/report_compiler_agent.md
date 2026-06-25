@@ -157,7 +157,7 @@ For each Markdown file that was created:
    - Deep: read `output.pdf_converter_deep` from `../.astro-paper/config.yaml`
 
 2. **If config entry is empty** (first conversion for this mode):
-   - Use pandoc default with actual filenames: `pandoc --pdf-engine=xelatex -V geometry:margin=1in paper-summaries/{safe_title}-rough-overview.md -o {safe_title}-rough-overview.pdf`
+   - Use pandoc default with actual filenames: `pandoc --pdf-engine=xelatex -V mainfont='DejaVu Serif' -V geometry:margin=1in paper-summaries/{safe_title}-rough-overview.md -o {safe_title}-rough-overview.pdf`
    - **On success**: Store the exact command (with actual filenames) in the config file under `pdf_converter_rough` or `pdf_converter_deep`
 
 3. **If config entry has a stored command**:
@@ -194,7 +194,7 @@ Before reporting completion, verify:
 |----------|----------|
 | Staging files missing (Step 3) | Report which files are missing; abort assembly |
 | `paper-summaries/` directory creation fails | Report error, attempt to save in paper directory root instead |
-| Pandoc not installed | Save Markdown only; tell user: "Install pandoc with `sudo apt install pandoc texlive-xetex` then run the stored pdf_converter command" |
+| Pandoc not installed | Save Markdown only; tell user: "Install pandoc with `sudo apt install pandoc texlive-xetex fonts-dejavu` then run the stored pdf_converter command" |
 | PDF conversion fails (pandoc error) | Save Markdown; report error with command output; ask user to verify pandoc + PDF engine |
 | Stored `pdf_converter` command fails | Try pandoc default with current filenames; if it works, update config; if not, save Markdown and report both failures |
 | Paper title too long (>200 chars after sanitization) | Truncate to 150 chars + "..." before using in filenames |
