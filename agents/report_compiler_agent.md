@@ -183,6 +183,8 @@ For each Markdown file that was created:
    ```
    **Expected output**: `{safe_title}-rough-overview.pdf` and `{safe_title}-deep-summary.pdf` in the paper directory root.
 
+6. **Store the latest successful conversion commands** in `../.astro-paper/config.yaml` for future re-conversion.
+
 ### Step 8: Report Completion
 
 Summarize to the user:
