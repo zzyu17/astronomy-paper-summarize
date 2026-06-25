@@ -156,16 +156,22 @@ For each Markdown file that was created:
    - Rough: read `output.pdf_converter_rough` from `../.astro-paper/config.yaml`
    - Deep: read `output.pdf_converter_deep` from `../.astro-paper/config.yaml`
 
-2. **If config entry is empty** (first conversion for this mode):
-   - Use pandoc default with actual filenames: `pandoc --pdf-engine=xelatex -V mainfont='DejaVu Serif' -V geometry:margin=1in paper-summaries/{safe_title}-rough-overview.md -o {safe_title}-rough-overview.pdf`
-   - **On success**: Store the exact command (with actual filenames) in the config file under `pdf_converter_rough` or `pdf_converter_deep`
+2. **Build the conversion command for the current paper**:
+   - **If config entry is empty or has no font support** (missing `-V mainfont`): Use the pandoc default:
+     ```
+     pandoc --pdf-engine=xelatex -V 'mainfont=DejaVu Serif' -V geometry:margin=1in paper-summaries/{safe_title}-rough-overview.md -o {safe_title}-rough-overview.pdf
+     ```
+   - **If config has a stored command**: Extract the converter options (engine, font, geometry) from the stored command, but **always use the current paper's filenames** — never run the stored command as-is.
+     - The stored command's filenames belong to a previous paper. Rebuild the command with `{safe_title}`.
+     - Example: stored has `Old Paper-rough-overview.md` → rebuild with `{safe_title}-rough-overview.md`
 
-3. **If config entry has a stored command**:
-   - Run the stored command directly (filenames are already resolved — no placeholder substitution needed)
-   - **On success**: Done — command still works
-   - **On failure**: Report the error + command output. Try pandoc default with current filenames. If pandoc succeeds, update the config entry for that mode and inform the user. If pandoc also fails, save the Markdown files and report both failures.
+3. **Run the built command**. On success:
+   - Store the command (with current paper's filenames) back to config, overwriting the old entry.
+   - This keeps the config up-to-date for manual re-conversion of the latest paper.
 
-4. **Save PDFs** to the paper directory root:
+4. **On failure**: Report the error. If the error suggests missing dependencies (e.g., `xelatex` not found), try fallback engines (`weasyprint`, `wkhtmltopdf`). If all fail, save Markdown only.
+
+5. **Save PDFs** to the paper directory root:
    - `{safe_title}-rough-overview.pdf`
    - `{safe_title}-deep-summary.pdf`
 

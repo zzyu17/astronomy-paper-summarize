@@ -58,25 +58,22 @@ The `pdf_converter_rough` and `pdf_converter_deep` fields store the shell comman
 
 **Initial state**: Both fields start empty (`""`).
 
-**First conversion**: When the `report_compiler_agent` runs its first PDF conversion for each mode, it uses `pandoc` as the default converter:
-```
-pandoc --pdf-engine=xelatex -V mainfont='DejaVu Serif' -V geometry:margin=1in <markdown-file> -o <pdf-file>
-```
-If the conversion succeeds, the command (with actual filenames) is stored in the config for that mode. If the default command fails (e.g., `xelatex` not installed), the agent will try alternatives and prompt the user for help.
+**Every PDF conversion**: The `report_compiler_agent` builds a fresh command for the current paper. After a successful conversion, it stores the command (with that paper's filenames) in the config, overwriting any previous entry.
 
-**Re-conversion**: On subsequent runs, the agent uses the stored command. If it fails, the agent falls back to the pandoc default, updates the config entry, and notifies the user.
+- **First run or empty config**: Uses the pandoc default:
+  ```
+  pandoc --pdf-engine=xelatex -V 'mainfont=DejaVu Serif' -V geometry:margin=1in <markdown-file> -o <pdf-file>
+  ```
+- **Subsequent papers**: Reads the stored command to learn the user's preferred converter options (engine, font, geometry), but **always rebuilds with the current paper's filenames**. The stored filenames from a previous paper are never reused.
+- **On failure**: Tries fallback engines (`weasyprint`, `wkhtmltopdf`). If all fail, saves Markdown only and reports errors.
 
-### Manual Editing
+**Important**: Because the config is shared across papers in a parent directory, the stored command always reflects the **most recently processed paper** only.
 
-The stored commands use actual filenames (not placeholders), so they can be run directly from the paper directory. The `pdf_converter_rough` or `pdf_converter_deep` fields can also be edited to use a different converter:
+### Manual Editing & Re-conversion
 
-```yaml
-output:
-  pdf_converter_rough: "pandoc --pdf-engine=weasyprint paper-summaries/My Paper-rough-overview.md -o My Paper-rough-overview.pdf"
-  pdf_converter_deep: "pandoc --pdf-engine=xelatex -V mainfont='DejaVu Serif' -V geometry:margin=1in paper-summaries/My Paper-deep-summary.md -o My Paper-deep-summary.pdf"
-```
+The stored commands use actual filenames for the most recent paper. To re-convert PDFs after editing Markdown, run the stored command directly from the paper directory — no placeholder substitution needed. Note that if you process a new paper, the stored command is updated to that paper's filenames.
 
-**To re-convert PDFs** after editing the Markdown summaries, run the stored command directly from the paper directory — no placeholder substitution needed.
+You can also manually edit the `pdf_converter_rough` or `pdf_converter_deep` fields to change the converter engine or options:
 
 ### Example Commands
 
@@ -84,7 +81,7 @@ Stored commands use actual filenames. Below are the equivalents before filename 
 
 | Converter | Command Pattern |
 |-----------|----------------|
-| **pandoc + xelatex** (default) | `pandoc --pdf-engine=xelatex -V mainfont='DejaVu Serif' -V geometry:margin=1in <md-file> -o <pdf-file>` |
+| **pandoc + xelatex** (default) | `pandoc --pdf-engine=xelatex -V 'mainfont=DejaVu Serif' -V geometry:margin=1in <md-file> -o <pdf-file>` |
 | **pandoc + weasyprint** | `pandoc --pdf-engine=weasyprint <md-file> -o <pdf-file>` |
 | **pandoc + wkhtmltopdf** | `pandoc --pdf-engine=wkhtmltopdf <md-file> -o <pdf-file>` |
 
