@@ -536,7 +536,7 @@ The [ADS API](https://api.adsabs.harvard.edu/v1/search/query) serves as the **pr
 
 When ADS API is unavailable, fall back to arXiv API:
 
-- **Endpoint**: `http://export.arxiv.org/api/query`
+- **Endpoint**: `https://export.arxiv.org/api/query`
 - **Format**: Atom 1.0 XML
 - **Rate limit**: ~3s between requests
 - **Key patterns**: ID lookup (`?id_list={arxiv_id}`), title search (`?search_query=ti:"{title}"`)

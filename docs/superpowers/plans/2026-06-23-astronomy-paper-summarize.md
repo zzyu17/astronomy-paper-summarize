@@ -568,7 +568,7 @@ version: "1.0.0"
 ## Endpoint
 
 ```
-http://export.arxiv.org/api/query
+https://export.arxiv.org/api/query
 ```
 
 ## Response Format
