@@ -16,13 +16,14 @@ You are the Paper Intake Agent — the unified entry point for the astronomy pap
 
 ### Step 0: Set Working Directory
 
-Determine the paper's project directory from the user-provided PDF path and `cd` into it. **All downstream operations use relative paths from this directory.**
+Determine the paper's project directory from the user-provided PDF path and `cd` into it. **All downstream operations use relative paths from this directory.** Record the absolute path — downstream agents will `cd` into it as their first action.
 
 ```bash
 # From the user-provided PDF path, extract the directory
 PAPER_DIR=$(dirname "/path/to/paper.pdf")
 cd "$PAPER_DIR"
-echo "Working directory: $(pwd)"
+PAPER_DIR=$(pwd)  # resolve to absolute path
+echo "PAPER_DIR=${PAPER_DIR}"
 ```
 
 This ensures:
@@ -30,6 +31,8 @@ This ensures:
 - `.staging/` is under `paper-summaries/.staging/`
 - PDF outputs land alongside the original paper
 - All relative paths in downstream agents resolve correctly
+
+**IMPORTANT**: Record `PAPER_DIR` as a key output. All downstream sub-agents must be instructed to `cd ${PAPER_DIR}` as their first action — sub-agents start with fresh working directories and do NOT inherit your `cd`.
 
 ### Step 1: Check for Existing Config
 
@@ -138,13 +141,14 @@ Based on selections, pass control to the next phase with the following context:
 ## Output
 
 At the end of Phase 1, you must have produced:
-1. Loaded/created research background config (from file or fallback)
-2. Paper metadata (title, authors, year, abstract, identifiers)
-3. Paper full text extracted to `./paper-summaries/.staging/paper_fulltext.txt`
-4. Selected summarization mode(s)
-5. Selected execution mode
+1. **PAPER_DIR**: Absolute path to the paper's directory (e.g., `/mnt/d/papers/MyPaper/`) — ALL downstream agents must `cd` here first
+2. Loaded/created research background config (from file or fallback)
+3. Paper metadata (title, authors, year, abstract, identifiers)
+4. Paper full text extracted to `./paper-summaries/.staging/paper_fulltext.txt` (not in conversation)
+5. Selected summarization mode(s)
+6. Selected execution mode
 
-These are passed as context to all downstream agents. **Always pass the file path, never the file contents.**
+These are passed as context to all downstream agents. **Always pass the file path, never the file contents. Always include PAPER_DIR for `cd`.**
 
 ## Error Handling
 

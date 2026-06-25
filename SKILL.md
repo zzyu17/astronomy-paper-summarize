@@ -102,16 +102,25 @@ Analysis agents (`rough_skimmer`, `relevance_assessor`, `deep_reader`, `methodol
 
 ### Subagent-Driven (Default)
 
-For each agent in the active phase sequence, dispatch as a sub-agent:
+For each agent in the active phase sequence, dispatch as a sub-agent. **The sub-agent's working directory defaults to the session's working directory — you MUST pass the paper directory and `cd` into it.**
 
+First, capture the paper directory from the intake phase output:
+```
+PAPER_DIR="/mnt/d/papers/<paper-name>"   # from paper_intake_agent Step 0
+```
+
+Then for each sub-agent dispatch:
 ```
 task({
   agent_type: "general-purpose",
   name: "<agent-name>",
-  prompt: [full content of agents/<agent_name>.md +
-           "Paper text is at: ./paper-summaries/.staging/paper_fulltext.txt" (for analysis agents) +
-           research background from config +
-           previous staging file paths (agents reference them if needed)]
+  prompt: [
+    "IMPORTANT: First, cd into the paper directory: cd " + PAPER_DIR + "\n\n" +
+    full content of agents/<agent_name>.md + "\n\n" +
+    "Paper text is at: ./paper-summaries/.staging/paper_fulltext.txt" (for analysis agents) + "\n" +
+    research background from config + "\n" +
+    previous staging file paths (agents reference them if needed)
+  ]
 })
 ```
 
@@ -122,6 +131,12 @@ After all analysis agents complete, dispatch `report_compiler_agent` which assem
 ### Inline Execution
 
 For each agent in the active phase sequence, work through sequentially:
+
+0. **First, capture the paper directory** from the intake phase (Step 0 output) and `cd` into it:
+   ```bash
+   cd /mnt/d/papers/<paper-name>   # from paper_intake_agent Step 0
+   ```
+   All subsequent operations use relative paths from this directory.
 
 1. Read the agent template from `agents/<agent_name>.md`
 2. Execute the agent's instructions — it writes output to `paper-summaries/.staging/<agent_name>.md`
