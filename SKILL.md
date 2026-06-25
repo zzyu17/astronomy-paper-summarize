@@ -100,6 +100,16 @@ When `both` mode: Phase 2a → Phase 2b → Phase 3.
 
 Analysis agents (`rough_skimmer`, `relevance_assessor`, `deep_reader`, `methodology_analyst`, `critical_evaluator`, `connection_synthesizer`) write their full output to `./paper-summaries/.staging/<agent_name>.md` and return ONLY a brief 1-line confirmation. The `report_compiler_agent` assembles final output from staging files via bash `cat` + heredocs — staging content never enters the conversation context.
 
+**NEVER read file content into the conversation for verification or any other purpose:**
+
+| ❌ Prohibited | ✅ Allowed |
+|---|---|
+| `cat file.md` | `test -s file.md && echo "OK"` |
+| `view file.md` | `wc -l < file.md` |
+| `head -N file.md` (more than 5 lines) | `head -5 file.md` (only to sample a few lines for debugging) |
+| `pdftotext file.pdf -` (stdout) | `pdftotext -layout file.pdf path/to/output.txt` |
+| Any tool that returns file content | Any bash command that returns only metadata (size, line count, existence) |
+
 ### Subagent-Driven (Default)
 
 For each agent in the active phase sequence, dispatch as a sub-agent. **The sub-agent's working directory defaults to the session's working directory — you MUST pass the paper directory and `cd` into it.**

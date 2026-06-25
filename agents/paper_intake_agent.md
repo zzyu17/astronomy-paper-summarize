@@ -69,11 +69,24 @@ If the user chooses to skip providing research background:
 
 **First, extract the paper's full text to a file — NEVER read it into the conversation.**
 
+**ABSOLUTE PROHIBITIONS (violating any of these wastes massive tokens):**
+
+| ❌ NEVER do this | ✅ Always do this instead |
+|---|---|
+| `pdftotext "file.pdf" -` (output to stdout) | `pdftotext -layout "file.pdf" paper-summaries/.staging/paper_fulltext.txt` |
+| `pdftotext "file.pdf" - \| head -150` (pipe to reader) | Extract to file first, then `head -100 paper-summaries/.staging/paper_fulltext.txt` if you need a preview |
+| `pdftotext "file.pdf" - \| wc -l` (any stdout pipe) | `wc -l < paper-summaries/.staging/paper_fulltext.txt` |
+| `view` / `cat` / reading tools on the extracted file | Bash-only checks: `test -s`, `wc -l < file`, `head -5` (only for metadata fallback) |
+
+**The `-` argument to `pdftotext` means stdout. Never use it. Always specify a file path.**
+
 ```bash
 mkdir -p paper-summaries/.staging
 
-# For PDF files:
+# For PDF files — ALWAYS output to file, NEVER to stdout (-):
 pdftotext -layout "paper.pdf" paper-summaries/.staging/paper_fulltext.txt
+# Verify extraction succeeded WITHOUT reading content:
+test -s paper-summaries/.staging/paper_fulltext.txt && echo "Extracted: $(wc -l < paper-summaries/.staging/paper_fulltext.txt) lines" || echo "EXTRACTION FAILED"
 
 # For plain text files (.txt, .md):
 cp paper.txt paper-summaries/.staging/paper_fulltext.txt
