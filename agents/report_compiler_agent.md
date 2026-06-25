@@ -150,6 +150,8 @@ rm -rf paper-summaries/.staging
 
 ### Step 7: Convert to PDF
 
+**CRITICAL: PDF files go in the paper directory root — alongside the original paper PDF, NOT inside `paper-summaries/`.**
+
 For each Markdown file that was created:
 
 1. **Check config for stored command**:
@@ -171,9 +173,15 @@ For each Markdown file that was created:
 
 4. **On failure**: Report the error. If the error suggests missing dependencies (e.g., `xelatex` not found), try fallback engines (`weasyprint`, `wkhtmltopdf`). If all fail, save Markdown only.
 
-5. **Save PDFs** to the paper directory root:
-   - `{safe_title}-rough-overview.pdf`
-   - `{safe_title}-deep-summary.pdf`
+5. **Ensure PDFs are in the paper directory root — NOT inside `paper-summaries/`**:
+   ```bash
+   cd "${PAPER_DIR}" && for pdf in paper-summaries/*.pdf; do
+       [ -f "$pdf" ] || continue
+       mv "$pdf" .
+       echo "MOVED: $pdf → ./$(basename "$pdf")"
+   done
+   ```
+   **Expected output**: `{safe_title}-rough-overview.pdf` and `{safe_title}-deep-summary.pdf` in the paper directory root.
 
 ### Step 8: Report Completion
 
@@ -190,6 +198,7 @@ Summarize to the user:
 Before reporting completion, verify:
 - [ ] All applicable Markdown files exist in `./paper-summaries/` (use `test -f`)
 - [ ] All applicable PDF files exist in paper directory root (use `test -f`)
+- [ ] **NO PDF files in `./paper-summaries/`** — `ls paper-summaries/*.pdf 2>/dev/null` must return nothing
 - [ ] Paper title sanitization was applied
 - [ ] `pdf_converter_rough` / `pdf_converter_deep` are populated in config (after first successful conversion) (use `grep` on config)
 - [ ] `.staging/` directory has been cleaned up (use `ls` to check it's empty/missing)
