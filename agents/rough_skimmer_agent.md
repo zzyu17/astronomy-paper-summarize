@@ -5,7 +5,7 @@ model: inherit
 phase: 2a
 mode: rough
 dependencies:
-  - paper full text (from paper_intake_agent)
+  - paper text file: `./paper-summaries/.staging/paper_fulltext.txt` (from paper_intake_agent)
   - research_background (from config/fallback)
 ---
 

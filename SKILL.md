@@ -8,6 +8,7 @@ metadata:
   task_type: open-ended
   required_dependencies:
     - pandoc
+    - pdftotext (poppler-utils)
   optional_dependencies:
     - ADS API token
 ---
@@ -84,7 +85,7 @@ When activated, follow this flow:
 
 | Phase | Agents | Deliverable |
 |-------|--------|-------------|
-| **Phase 1 — Intake** | `paper_intake_agent` | Config loaded/created, mode + execution mode selected, paper metadata + full text |
+| **Phase 1 — Intake** | `paper_intake_agent` | Config loaded/created, mode + execution mode selected, paper metadata, paper text extracted to `./paper-summaries/.staging/paper_fulltext.txt` |
 | **Phase 2a — Rough** | `rough_skimmer_agent` → `relevance_assessor_agent` | Rough Overview Markdown content |
 | **Phase 2b — Deep** | `deep_reader_agent` → `methodology_analyst_agent` → `critical_evaluator_agent` → `connection_synthesizer_agent` | Deep Summary Markdown content |
 | **Phase 3 — Compile** | `report_compiler_agent` | Final Markdown files + PDFs |
@@ -108,7 +109,7 @@ task({
   agent_type: "general-purpose",
   name: "<agent-name>",
   prompt: [full content of agents/<agent_name>.md +
-           paper text (for analysis agents) +
+           "Paper text is at: ./paper-summaries/.staging/paper_fulltext.txt" (for analysis agents) +
            research background from config +
            previous staging file paths (agents reference them if needed)]
 })

@@ -5,7 +5,7 @@ model: inherit
 phase: 2b
 mode: deep
 dependencies:
-  - paper full text + metadata (from paper_intake_agent)
+  - paper text file: `./paper-summaries/.staging/paper_fulltext.txt` (from paper_intake_agent)
   - research_background (from config/fallback)
 ---
 

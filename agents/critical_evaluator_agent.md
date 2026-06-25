@@ -5,7 +5,7 @@ model: inherit
 phase: 2b
 mode: deep
 dependencies:
-  - paper full text + metadata (from paper_intake_agent)
+  - paper text file: `./paper-summaries/.staging/paper_fulltext.txt` (from paper_intake_agent)
   - deep_reader_agent output (Structured Summary)
   - methodology_analyst_agent output (Methodological Deep Dive)
 ---

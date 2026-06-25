@@ -64,7 +64,26 @@ If the user chooses to skip providing research background:
 
 ### Step 4: Paper Content Acquisition
 
-Use the **ADS → arXiv → manual** fallback chain:
+**First, extract the paper's full text to a file — NEVER read it into the conversation.**
+
+```bash
+mkdir -p paper-summaries/.staging
+
+# For PDF files:
+pdftotext -layout "paper.pdf" paper-summaries/.staging/paper_fulltext.txt
+
+# For plain text files (.txt, .md):
+cp paper.txt paper-summaries/.staging/paper_fulltext.txt
+
+# If user pastes text inline, write it to file directly:
+cat > paper-summaries/.staging/paper_fulltext.txt << 'EOF'
+[user-pasted content]
+EOF
+```
+
+The paper text now lives at `./paper-summaries/.staging/paper_fulltext.txt` and does NOT occupy the conversation context. All downstream agents reference this file path, not inline text.
+
+Then, use the **ADS → arXiv → manual** fallback chain for metadata:
 
 1. **Try ADS API first** (if token available):
    - Query by arXiv ID (if user provided) or paper title
@@ -77,11 +96,11 @@ Use the **ADS → arXiv → manual** fallback chain:
    - Reference: `references/arxiv_api_protocol.md`
 
 3. **Final fallback — manual extraction**:
-   - If both APIs unavailable, extract metadata from the user-provided PDF/text
-   - Read the first page: extract title, authors, abstract
+   - If both APIs unavailable, extract metadata by reading only the first ~100 lines of `paper-summaries/.staging/paper_fulltext.txt` (title, authors, abstract section)
+   - Use `head -100` to avoid loading full text into context
    - Prompt user to verify or fill in missing fields
 
-**Important**: The paper's **full text** always comes from the user-provided file (PDF, text, or pasted content). APIs supply metadata and abstract only.
+**Important**: The paper's **full text** always comes from the user-provided file (PDF, text, or pasted content). APIs supply metadata and abstract only. The full text is stored in `paper-summaries/.staging/paper_fulltext.txt`.
 
 ### Step 5: Mode Selection
 
@@ -105,7 +124,7 @@ Options:
 ### Step 7: Route to Analysis Phases
 
 Based on selections, pass control to the next phase with the following context:
-- Paper full text
+- Paper text file path: `./paper-summaries/.staging/paper_fulltext.txt` (downstream agents read this file directly)
 - Paper metadata (from API or extraction)
 - Research background (from config or fallback)
 - Selected modes (rough/deep/both)
@@ -121,11 +140,11 @@ Based on selections, pass control to the next phase with the following context:
 At the end of Phase 1, you must have produced:
 1. Loaded/created research background config (from file or fallback)
 2. Paper metadata (title, authors, year, abstract, identifiers)
-3. Paper full text (from user's file)
+3. Paper full text extracted to `./paper-summaries/.staging/paper_fulltext.txt`
 4. Selected summarization mode(s)
 5. Selected execution mode
 
-These are passed as context to all downstream agents.
+These are passed as context to all downstream agents. **Always pass the file path, never the file contents.**
 
 ## Error Handling
 
