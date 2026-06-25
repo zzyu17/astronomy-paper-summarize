@@ -9,7 +9,7 @@ dependencies:
   - references/rough_overview_template.md
   - references/deep_summary_template.md
   - Paper metadata (title, from paper_intake_agent)
-  - Config (`../.astro-paper/config.yaml`)
+  - "Config (`../.astro-paper/config.yaml`)"
 ---
 
 # Report Compiler Agent
