@@ -125,8 +125,11 @@ For each agent in the active phase sequence, work through sequentially:
 
 1. Read the agent template from `agents/<agent_name>.md`
 2. Execute the agent's instructions — it writes output to `paper-summaries/.staging/<agent_name>.md`
-3. Confirm the staging file was written (brief check)
-4. Move to the next agent
+3. Confirm the staging file was written via `test -s` (do NOT read file content):
+   ```bash
+   test -s paper-summaries/.staging/<agent_name>.md && echo "OK" || echo "MISSING"
+   ```
+4. If MISSING, re-execute the agent. If OK, move to the next agent.
 5. After all analysis agents, execute `report_compiler_agent` instructions for bash assembly
 
 **Warning:** If running `both` mode on a long paper, monitor context usage. Warn the user if approaching context limits.

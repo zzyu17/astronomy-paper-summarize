@@ -94,7 +94,10 @@ A single sentence summarizing the most critical piece of information for the use
 ```
 3. Do NOT include a top-level `#` title header — the compiler adds that.
 4. Create the `.staging/` directory if it doesn't exist.
-5. Verify the file was written and is non-empty.
-6. Return ONLY a brief confirmation: "Relevance assessment complete — written to `.staging/relevance_assessor.md` (<N> words). Score: <X>/10 (<classification>)."
+5. Verify via bash only (do NOT read file content):
+   ```bash
+   test -s paper-summaries/.staging/relevance_assessor.md && echo "OK" || echo "MISSING"
+   ```
+6. If "MISSING", re-write the file. If "OK", return ONLY a brief confirmation: "Relevance assessment complete — written to `.staging/relevance_assessor.md` (<N> words). Score: <X>/10 (<classification>)."
 
 Do NOT include the content in your response. The `report_compiler_agent` assembles via bash.

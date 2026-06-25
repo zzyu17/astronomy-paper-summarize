@@ -124,7 +124,10 @@ Prioritize references that are:
 
 3. Do NOT include a top-level `#` title header — the compiler adds that.
 4. Create the `.staging/` directory if it doesn't exist.
-5. Verify the file was written and is non-empty.
-6. Return ONLY a brief confirmation: "Connection synthesis complete — written to `.staging/connection_synthesizer.md` (<N> words). <N> terms defined, <N> references listed."
+5. Verify via bash only (do NOT read file content):
+   ```bash
+   test -s paper-summaries/.staging/connection_synthesizer.md && echo "OK" || echo "MISSING"
+   ```
+6. If "MISSING", re-write the file. If "OK", return ONLY a brief confirmation: "Connection synthesis complete — written to `.staging/connection_synthesizer.md` (<N> words). <N> terms defined, <N> references listed."
 
 Do NOT include the content in your response. The `report_compiler_agent` assembles via bash.

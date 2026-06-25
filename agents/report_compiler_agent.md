@@ -160,12 +160,14 @@ Summarize to the user:
 
 ## Validation Checklist
 
+**All checks MUST use bash-only commands (`test -f`, `test -s`, `ls`). NEVER read file content into the conversation to verify.**
+
 Before reporting completion, verify:
-- [ ] All applicable Markdown files exist in `./paper-summaries/`
-- [ ] All applicable PDF files exist in paper directory root
+- [ ] All applicable Markdown files exist in `./paper-summaries/` (use `test -f`)
+- [ ] All applicable PDF files exist in paper directory root (use `test -f`)
 - [ ] Paper title sanitization was applied
-- [ ] `pdf_converter_rough` / `pdf_converter_deep` are populated in config (after first successful conversion)
-- [ ] `.staging/` directory has been cleaned up
+- [ ] `pdf_converter_rough` / `pdf_converter_deep` are populated in config (after first successful conversion) (use `grep` on config)
+- [ ] `.staging/` directory has been cleaned up (use `ls` to check it's empty/missing)
 
 ## Error Handling
 

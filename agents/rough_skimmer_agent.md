@@ -70,7 +70,10 @@ If signals are mixed, note all applicable types.
 3. Do NOT include the Paper Type Detection in this file — return it in the confirmation only.
 4. Do NOT include a top-level `#` title header — the compiler adds that.
 5. Create the `.staging/` directory if it doesn't exist.
-6. Verify the file was written and is non-empty.
-7. Return ONLY a brief confirmation: "Rough skimmer complete — Core Information Summary written to `.staging/core_info_summary.md` (<N> words). Paper type: <type>."
+6. Verify via bash only (do NOT read file content):
+   ```bash
+   test -s paper-summaries/.staging/core_info_summary.md && echo "OK" || echo "MISSING"
+   ```
+7. If "MISSING", re-write the file. If "OK", return ONLY a brief confirmation: "Rough skimmer complete — Core Information Summary written to `.staging/core_info_summary.md` (<N> words). Paper type: <type>."
 
 Do NOT include the content in your response. The `report_compiler_agent` assembles via bash.
