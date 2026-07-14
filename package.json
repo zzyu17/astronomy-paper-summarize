@@ -1,6 +1,6 @@
 {
   "name": "astronomy-paper-summarize",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Multi-agent astronomy paper summarization. 8-agent team for rough overview (rapid triage) and deep summary (comprehensive critical analysis). 4 modes: rough, deep, both, config. Research-background-aware relevance scoring, ADS/arXiv API integration, pandoc PDF output, and astronomical pipeline context knowledge.",
   "author": {
     "name": "Zhenyu Zhang",
@@ -20,6 +20,6 @@
     "arxiv"
   ],
   "skills": {
-    "directory": "."
+    "directory": "./skills"
   }
 }

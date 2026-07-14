@@ -1,0 +1,20 @@
+{
+  "name": "astronomy-paper-summarize",
+  "interface": {
+    "displayName": "Astronomy Paper Summarize"
+  },
+  "plugins": [
+    {
+      "name": "astronomy-paper-summarize",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/zzyu17/astronomy-paper-summarize.git"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

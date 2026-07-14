@@ -2,8 +2,8 @@
 name: astronomy-paper-summarize
 description: "Multi-agent astronomy paper summarization skill. 8-agent team for rough overview (rapid triage) and deep summary (comprehensive critical analysis) with research-background-aware relevance scoring. 4 modes: rough, deep, both, config. Triggers on: summarize paper, paper summary, rough overview, deep summary, astro paper, astronomy paper, analyze paper, break down paper, what does this paper say, 论文总结, 天文学论文."
 metadata:
-  version: "1.0.0"
-  last_updated: "2026-06-23"
+  version: "1.1.0"
+  last_updated: "2026-07-14"
   status: active
   task_type: open-ended
   required_dependencies:
@@ -94,6 +94,24 @@ When `both` mode: Phase 2a → Phase 2b → Phase 3.
 
 ## Execution Mode Dispatch
 
+### Path Roots (Both Modes)
+
+Capture and keep these two absolute paths separate:
+
+```text
+SKILL_DIR = absolute directory containing this SKILL.md
+PAPER_DIR = absolute directory containing the user's paper
+```
+
+Bundled prompt templates and references always resolve from `SKILL_DIR`:
+
+```text
+${SKILL_DIR}/agents/
+${SKILL_DIR}/references/
+```
+
+Paper input, research configuration, staging files, and generated reports always resolve from `PAPER_DIR`. Never resolve bundled resources relative to `PAPER_DIR`, and never write paper outputs into `SKILL_DIR`.
+
 ### Output Discipline (Both Modes)
 
 **CRITICAL: All analysis agents write output to staging files, never to the conversation.**
@@ -112,45 +130,64 @@ Analysis agents (`rough_skimmer`, `relevance_assessor`, `deep_reader`, `methodol
 
 ### Subagent-Driven (Default)
 
-For each agent in the active phase sequence, dispatch as a sub-agent. **The sub-agent's working directory defaults to the session's working directory — you MUST pass the paper directory as a literal bash variable and instruct the agent to prefix every file command with `cd &&`.**
+For each agent in the active phase sequence, dispatch a fresh sub-agent through the platform's native operation. **The sub-agent's working directory defaults to the session's working directory — you MUST pass `PAPER_DIR` and `SKILL_DIR` as literal variables and instruct the agent to prefix every command that accesses paper data or output with `cd "${PAPER_DIR}" &&`.**
 
-First, capture the paper directory from the intake phase output:
-```
-PAPER_DIR="/mnt/d/papers/<paper-name>"   # from paper_intake_agent Step 0
+First, capture both path roots:
+
+```bash
+SKILL_DIR="/absolute/path/to/skills/astronomy-paper-summarize"
+PAPER_DIR="/absolute/path/to/papers/<paper-name>"   # from paper_intake_agent Step 0
 ```
 
-Then for each sub-agent dispatch:
+Use the operation available on the current platform:
+
+| Platform                   | Native subagent operation                                                                              | Completion operation                     |
+|----------------------------|--------------------------------------------------------------------------------------------------------|------------------------------------------|
+| Codex                      | `spawn_agent` with a concrete `task_name`, `fork_turns: "none"`, and the assembled prompt in `message` | Call `wait_agent` for the returned agent |
+| Claude Code                | `Agent` with the built-in `general-purpose` agent and the assembled prompt                             | Wait for the foreground Agent result     |
+| Copilot                    | Its native `general-purpose` subagent operation with `task` tool and the assembled prompt              | Wait for that worker to finish           |
+| Other compatible platforms | The corresponding subagent dispatch operation with the assembled prompt                                | Wait for that worker to finish           |
+
+Assemble every worker prompt in this exact order:
+
+```text
+PAPER_DIR="<absolute paper directory>"
+SKILL_DIR="<absolute directory containing SKILL.md>"
+
+CRITICAL: Shell sessions are stateless. Every command that accesses paper data or output must start with:
+cd "${PAPER_DIR}" &&
+
+Bundled resources are read from absolute paths under:
+${SKILL_DIR}/agents/
+${SKILL_DIR}/references/
+
+<full content of ${SKILL_DIR}/agents/<agent_name>.md>
+
+Paper text path relative to PAPER_DIR:
+./paper-summaries/.staging/paper_fulltext.txt
+
+<research background from config or fallback>
+<paths of prerequisite staging files>
 ```
-task({
-  agent_type: "general-purpose",
-  name: "<agent-name>",
-  prompt: [
-    "PAPER_DIR=\"" + PAPER_DIR + "\"\n\n" +           // Must be first — literal assignment
-    "CRITICAL: This platform's bash sessions are stateless. `cd` does NOT persist between calls.\n" +
-    "EVERY file command MUST start with: cd \"${PAPER_DIR}\" && \n\n" +
-    full content of agents/<agent_name>.md + "\n\n" +
-    "Paper text is at: ./paper-summaries/.staging/paper_fulltext.txt (use with `cd` prefix)" + "\n" +
-    research background from config + "\n" +
-    previous staging file paths (agents reference them if needed)
-  ]
-})
-```
+
+Identify every bundled reference required by the worker with its absolute path under `${SKILL_DIR}/references/`.
 
 The sub-agent writes its output to `paper-summaries/.staging/<agent_name>.md` and returns only a brief confirmation. The main session never loads the full content.
 
-After all analysis agents complete, dispatch `report_compiler_agent` which assembles via bash.
+Dispatch agents in the existing phase order. Start an agent only after all prerequisite staging files have been produced; do not parallelize dependent analysis agents. After all analysis agents complete, dispatch `report_compiler_agent`, which assembles via bash.
 
 ### Inline Execution
 
 For each agent in the active phase sequence, work through sequentially:
 
-0. **First, capture the paper directory** from the intake phase (Step 0 output):
+0. **First, capture both path roots**:
    ```bash
-   PAPER_DIR="/mnt/d/papers/<paper-name>"   # from paper_intake_agent Step 0
+   SKILL_DIR="/absolute/path/to/skills/astronomy-paper-summarize"
+   PAPER_DIR="/absolute/path/to/papers/<paper-name>"   # from paper_intake_agent Step 0
    ```
    **CRITICAL: Bash sessions are stateless — `cd` does NOT persist between calls. Every file command MUST be prefixed with `cd "${PAPER_DIR}" && `.**
 
-1. Read the agent template from `agents/<agent_name>.md`
+1. Read the agent template from `${SKILL_DIR}/agents/<agent_name>.md` and any required bundled reference from `${SKILL_DIR}/references/<file>.md`
 2. Execute the agent's instructions — prefix all file operations with `cd "${PAPER_DIR}" && `
 3. Confirm the staging file was written (do NOT read file content):
    ```bash

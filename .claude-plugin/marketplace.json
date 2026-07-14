@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "astronomy-paper-summarize",
+  "owner": {
+    "name": "Zhenyu Zhang"
+  },
+  "description": "Multi-agent astronomy paper summarization with rough overview and deep critical-analysis modes.",
+  "plugins": [
+    {
+      "name": "astronomy-paper-summarize",
+      "source": {
+        "source": "github",
+        "repo": "zzyu17/astronomy-paper-summarize"
+      },
+      "category": "productivity"
+    }
+  ]
+}

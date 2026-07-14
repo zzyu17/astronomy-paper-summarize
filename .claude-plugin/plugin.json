@@ -1,7 +1,9 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "astronomy-paper-summarize",
+  "displayName": "Astronomy Paper Summarize",
   "version": "1.1.0",
-  "description": "Multi-agent astronomy paper summarization skill. 8-agent team for rough overview (rapid triage) and deep summary (comprehensive critical analysis). 4 modes: rough, deep, both, config. Research-background-aware relevance scoring, ADS/arXiv API integration, pandoc PDF output, and astronomical pipeline context knowledge.",
+  "description": "Multi-agent astronomy paper summarization with rough overview and deep critical-analysis modes.",
   "author": {
     "name": "Zhenyu Zhang",
     "url": "https://github.com/zzyu17"

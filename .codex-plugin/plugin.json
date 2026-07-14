@@ -1,0 +1,38 @@
+{
+  "name": "astronomy-paper-summarize",
+  "version": "1.1.0",
+  "description": "Multi-agent astronomy paper summarization with rough overview and deep critical-analysis modes.",
+  "author": {
+    "name": "Zhenyu Zhang",
+    "url": "https://github.com/zzyu17"
+  },
+  "homepage": "https://github.com/zzyu17/astronomy-paper-summarize",
+  "repository": "https://github.com/zzyu17/astronomy-paper-summarize",
+  "license": "CC-BY-NC-4.0",
+  "keywords": [
+    "astronomy",
+    "astrophysics",
+    "paper-summary",
+    "literature-review",
+    "paper-summarization",
+    "astronomy-research",
+    "ads",
+    "arxiv"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Astronomy Paper Summarize",
+    "shortDescription": "Multi-agent astronomy paper summarization",
+    "longDescription": "Multi-agent astronomy paper summarization with rough overview and deep critical-analysis modes.",
+    "developerName": "Zhenyu Zhang",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/zzyu17/astronomy-paper-summarize",
+    "defaultPrompt": [
+      "Summarize this astronomy paper."
+    ]
+  }
+}
